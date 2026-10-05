@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ds_bg">#ffffff</color>
+    <color name="ds_bg_soft">#f7f8fa</color>
+    <color name="ds_border">#ebedf0</color>
+    <color name="ds_primary">#4d6bfe</color>
+    <color name="ds_primary_pressed">#3b56d4</color>
+    <color name="ds_text">#1f2329</color>
+    <color name="ds_text_secondary">#8f959e</color>
+</resources>

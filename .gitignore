@@ -1,0 +1,18 @@
+# Gradle
+.gradle/
+build/
+*/build/
+/local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Signing(不要把真实 keystore 提交进仓库)
+*.jks
+*.keystore
+
+# 系统文件
+.DS_Store
+Thumbs.db
