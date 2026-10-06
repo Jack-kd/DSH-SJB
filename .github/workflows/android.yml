@@ -1,8 +1,13 @@
 name: Build APK
 
+# 触发时机:
+#  - push 到 main/master
+#  - 打 v* tag(额外发布 GitHub Release,附 APK)
+#  - PR / 手动运行(workflow_dispatch)
 on:
   push:
     branches: [main, master]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -11,6 +16,7 @@ permissions:
 
 jobs:
   build:
+    name: Build debug + release APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,24 +28,31 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Gradle (带缓存)
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: latest
 
-      - name: Install SDK platform 36
+      - name: Accept licenses & install SDK components
         run: |
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platforms;android-36" >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" >/dev/null 2>&1 || true
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build APKs
+        run: ./gradlew assembleDebug assembleRelease --stacktrace
 
-      - name: Build release APK (debug-signed)
-        run: ./gradlew assembleRelease --stacktrace
+      - name: Collect APK info
+        run: |
+          ls -lh app/build/outputs/apk/debug/ app/build/outputs/apk/release/
+          sha256sum app/build/outputs/apk/debug/*.apk app/build/outputs/apk/release/*.apk
 
-      - name: Upload APKs
+      - name: Upload APKs (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: dsh-mobile-apks
@@ -47,3 +60,25 @@ jobs:
             app/build/outputs/apk/debug/*.apk
             app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+          retention-days: 30
+
+  # 打 v* tag 时,把编译产物发布为 GitHub Release(自动生成 changelog)
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: dsh-mobile-apks
+          path: apks
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apks/**/*.apk
+          generate_release_notes: true
