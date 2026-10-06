@@ -86,6 +86,32 @@ dsh-mobile/
 
 APK 输出在 `app/build/outputs/apk/`。
 
+### 方式三:一键安装本地构建工具(给想在本机编译的人)
+
+不用手工下载 JDK/SDK,一条命令自动装好(自动识别 x86_64 / aarch64,走国内镜像):
+
+```bash
+bash tools/setup-tools.sh          # 装到 ~/tools
+source ~/tools/env.sh              # 之后 java / javac / sdkmanager 直接可用
+```
+
+脚本会安装 OpenJDK 17 + Android cmdline-tools(含 platform 36)+ 预置 Gradle 8.13,幂等可重复执行。
+
+## 分享给他人使用
+
+三种方式,按对方需求选:
+
+1. **Fork 本仓库 → Actions 编译(零安装,最推荐)**
+   对方只需 GitHub 账号:进入本仓库页 → **Fork** → 自己仓库的 **Actions** 页面自动开始编译 →
+   运行页 **Artifacts** 下载 `dsh-mobile-apks`(含 debug/release 两个可安装 APK)。全程不需要装任何工具。
+   (注:仓库默认 private 时对方无法 Fork,需先公开或添加为 Collaborator。)
+
+2. **本地一键脚本**:对方把自己的设备/电脑上执行
+   `bash tools/setup-tools.sh && source ~/tools/env.sh && ./gradlew assembleDebug`
+   即可在本机产出 APK(x86_64 / aarch64 均支持)。
+
+3. **完整打包请在 GitHub Actions 上跑**:aapt2 无 aarch64 版,ARM 设备本地只能编译验证,不能打包。
+
 ## 签名说明
 
 - 工程默认 **release 也用调试签名**(`app/build.gradle.kts` 中注释),保证 Actions 开箱即出**可安装**的 APK。
