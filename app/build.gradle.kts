@@ -23,6 +23,12 @@ android {
         }
     }
 
+    // 原版 APK 就是 targetSdk 28,重建保持行为一致;
+    // 禁用 Google Play 上架合规检查(ExpiredTargetSdkVersion),避免 release lint 直接失败。
+    lint {
+        disable += "ExpiredTargetSdkVersion"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
