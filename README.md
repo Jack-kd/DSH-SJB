@@ -97,26 +97,11 @@ source ~/tools/env.sh              # 之后 java / javac / sdkmanager 直接可�
 
 脚本会安装 OpenJDK 17 + Android cmdline-tools(含 platform 36)+ 预置 Gradle 8.13,幂等可重复执行。
 
-### 方式四:一键安装反编译工具链(给做逆向/用 AI 反编译的人)
-
-```bash
-bash tools/setup-reverse-tools.sh  # 装到 ~/tools
-source ~/tools/env.sh              # 之后 jadx / decompile 直接可用
-```
-
-脚本自动装好 **OpenJDK 17 + jadx 1.5.6**(CLI + GUI),jadx 走加速代理下载并做 sha256 校验;
-幂等可重复执行。之后:
-
-```bash
-decompile app.apk          # 反编译 → 输出到 out/(等价 jadx -d out app.apk)
-jadx-gui app.apk           # 图形界面(需桌面环境)
-```
-
-给 AI 用:在任何会话里先 `source ~/tools/env.sh`,AI 即可直接调用 `jadx`,无需每次重新下载工具。
+> 反编译工具链(jadx)已独立成仓:[`Jack-kd/decompilation-tools`](https://github.com/Jack-kd/decompilation-tools)
 
 ## 分享给他人使用
 
-四种方式,按对方需求选:
+三种方式,按对方需求选:
 
 1. **Fork 本仓库 → Actions 编译(零安装,最推荐)**
    对方只需 GitHub 账号:进入本仓库页 → **Fork** → 自己仓库的 **Actions** 页面自动开始编译 →
@@ -127,10 +112,7 @@ jadx-gui app.apk           # 图形界面(需桌面环境)
    `bash tools/setup-tools.sh && source ~/tools/env.sh && ./gradlew assembleDebug`
    即可在本机产出 APK(x86_64 / aarch64 均支持)。
 
-3. **反编译工具链**:对方执行 `bash tools/setup-reverse-tools.sh` + `source ~/tools/env.sh`,
-   即可用 `jadx` 反编译任意 APK(Android / Linux / macOS 的 x86_64 / aarch64 均支持)。
-
-4. **完整打包请在 GitHub Actions 上跑**:aapt2 无 aarch64 版,ARM 设备本地只能编译验证,不能打包。
+3. **完整打包请在 GitHub Actions 上跑**:aapt2 无 aarch64 版,ARM 设备本地只能编译验证,不能打包。
 
 ## 签名说明
 
