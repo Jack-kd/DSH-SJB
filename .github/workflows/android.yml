@@ -36,8 +36,12 @@ jobs:
       # ubuntu-latest 镜像自带 Android SDK,这里直接用 sdkmanager 补装组件。
       - name: Accept licenses & install SDK components
         run: |
-          yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" >/dev/null 2>&1 || true
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          if [ ! -d "$ANDROID_SDK_ROOT/platforms/android-36" ]; then
+            yes | sdkmanager --licenses >/dev/null 2>&1 || true
+            sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          fi
+          test -f "$ANDROID_SDK_ROOT/platforms/android-36/android.jar"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
