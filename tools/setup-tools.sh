@@ -70,14 +70,29 @@ fi
 # ---------- 4. 权限(Android 存储会抹执行位,必须补) ----------
 chmod -R a+rx "$TOOLS_DIR/jdk17" "$TOOLS_DIR/android-sdk" 2>/dev/null || true
 
-# ---------- 5. 环境加载脚本 ----------
-cat > "$TOOLS_DIR/env.sh" <<EOF
-# DSH Android 构建工具环境(由 setup-tools.sh 生成)
-export JAVA_HOME=$TOOLS_DIR/jdk17
-export ANDROID_HOME=$TOOLS_DIR/android-sdk
-export ANDROID_SDK_ROOT=$TOOLS_DIR/android-sdk
-export PATH="\$JAVA_HOME/bin:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:\$PATH"
-echo "[tools] JDK: \$JAVA_HOME (\$("$TOOLS_DIR/jdk17/bin/java" -version 2>&1 | head -1))"
+# ---------- 5. 环境加载脚本(自动发现组件,幂等) ----------
+cat > "$TOOLS_DIR/env.sh" <<'EOF'
+# DSH 全局工具环境(自动发现组件,由 setup-tools.sh / setup-reverse-tools.sh 生成)
+TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# --- JDK ---
+export JAVA_HOME="$TOOLS_DIR/jdk17"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# --- Android SDK ---
+export ANDROID_HOME="$TOOLS_DIR/android-sdk"
+export ANDROID_SDK_ROOT="$TOOLS_DIR/android-sdk"
+[ -d "$TOOLS_DIR/android-sdk/cmdline-tools/latest/bin" ] && export PATH="$TOOLS_DIR/android-sdk/cmdline-tools/latest/bin:$PATH"
+
+# --- jadx 反编译工具 ---
+[ -x "$TOOLS_DIR/jadx/bin/jadx" ] && export PATH="$TOOLS_DIR/jadx/bin:$PATH"
+
+# 反编译快捷命令:decompile app.apk → 输出到 out/
+decompile() { jadx -d out "$1"; }
+
+echo "[tools] JDK: $JAVA_HOME ($("$JAVA_HOME/bin/java" -version 2>&1 | head -1))"
+[ -x "$TOOLS_DIR/jadx/bin/jadx" ] && echo "[tools] jadx: $("$TOOLS_DIR/jadx/bin/jadx" --version 2>/dev/null)"
+[ -d "$TOOLS_DIR/android-sdk/cmdline-tools/latest/bin" ] && echo "[tools] AndroidSDK: $ANDROID_SDK_ROOT"
 EOF
 
 # ---------- 6. 初始化 SDK:接受许可 + 装 platform 36 ----------
