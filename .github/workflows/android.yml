@@ -31,11 +31,9 @@ jobs:
       - name: Setup Gradle (带缓存)
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: latest
-
+      # 注意:不要用 android-actions/setup-android —— 该 action 内部执行
+      # `sdkmanager tools`,而 Google 已下架旧 tools 包,必然失败。
+      # ubuntu-latest 镜像自带 Android SDK,这里直接用 sdkmanager 补装组件。
       - name: Accept licenses & install SDK components
         run: |
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
